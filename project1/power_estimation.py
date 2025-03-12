@@ -1,14 +1,26 @@
 import pandas as pd
 
 # Load the CSV file
-df1 = pd.read_csv('/Users/riccardoorlandi/Desktop/universita/5anno/2semestre/INTERNET_OF_THINGS/projects/project1/deep_sleep.csv')
-df2 = pd.read_csv('/Users/riccardoorlandi/Desktop/universita/5anno/2semestre/INTERNET_OF_THINGS/projects/project1/sensor_read.csv')
-df3 = pd.read_csv('/Users/riccardoorlandi/Desktop/universita/5anno/2semestre/INTERNET_OF_THINGS/projects/project1/transmission_power.csv')
+df1 = pd.read_csv('/Users/riccardoorlandi/Desktop/universita/5anno/2semestre/INTERNET_OF_THINGS/projects/IoT_project/project1/data/deep_sleep.csv')
+df2 = pd.read_csv('/Users/riccardoorlandi/Desktop/universita/5anno/2semestre/INTERNET_OF_THINGS/projects/IoT_project/project1/data/sensor_read.csv')
+df3 = pd.read_csv('/Users/riccardoorlandi/Desktop/universita/5anno/2semestre/INTERNET_OF_THINGS/projects/IoT_project/project1/data/transmission_power.csv')
 
-# Calculate the average power consumptions
-avg_power_deep_sleep = df1['Data'].mean()
-avg_power_sensor_read = df2['Data'].mean()
-avg_power_transmission = df3['Data'].mean()
+#extract the data column
+data_values1 = df1['Data']
+data_values2 = df2['Data']
+data_values3 = df3['Data']
+
+#save the data in different structure 
+deep_sleep = data_values1[data_values1 < 100]
+wifi_off = data_values1[(data_values1 > 300) & (data_values1 < 320)]
+wifi_on = data_values1[(data_values1 > 700) & (data_values1 < 800)]
+sensor_reading =data_values2[data_values2 > 460]
+idle =data_values2[data_values2 < 340]
+
+avg_power_deep_sleep = deep_sleep.mean()
+avg_power_sensor_read = wifi_off.mean()
+avg_power_transmission = wifi_on.mean()
+
 
 # Define the duration of each state (in seconds)
 duration_idle = 0 

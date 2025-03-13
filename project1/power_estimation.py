@@ -14,23 +14,27 @@ data_values3 = df3['Data']
 deep_sleep = data_values1[data_values1 < 100]
 wifi_off = data_values1[(data_values1 > 300) & (data_values1 < 320)]
 wifi_on = data_values1[(data_values1 > 700) & (data_values1 < 800)]
+boot = data_values1[(data_values1 > 350) & (data_values1 < 400)]
 sensor_reading =data_values2[data_values2 > 460]
 idle =data_values2[data_values2 < 340]
 
 avg_power_deep_sleep = deep_sleep.mean()
-avg_power_sensor_read = wifi_off.mean()
-avg_power_transmission = wifi_on.mean()
+avg_power_wifi_off = wifi_off.mean()
+avg_power_wifi_on = wifi_on.mean()
+avg_power_boot = boot.mean()
+avg_power_sensor_reading = sensor_reading.mean()
+avg_power_idle = idle.mean()
 
 
 # Define the duration of each state (in seconds)
-duration_idle = 0 
-duration_transmission = 0.000297   #297 microsecondi  
+duration_boot = 
+duration_transmission = 0.000297   #305 microsecondi  
 duration_sensor_reading = 0.0013  #1300 microsecondi
 duration_deep_sleep = 2 
-
+duration_idle = 0 
 # Calculate the energy consumption for each state (in mJ)
 energy_deep_sleep = avg_power_deep_sleep * duration_deep_sleep * 1000  
-energy_sensor_reading = avg_power_sensor_read * duration_sensor_reading * 1000
+energy_sensor_reading = avg_power_sensor_reading * duration_sensor_reading * 1000
 energy_transmission = avg_power_transmission * duration_transmission * 1000
 
 # Calculate the total energy consumption for one transmission cycle (in mJ)

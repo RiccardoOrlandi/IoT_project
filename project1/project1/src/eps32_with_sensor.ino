@@ -4,34 +4,34 @@
 #include "soc/rtc_cntl_reg.h"
 
 #define uS_TO_S_FACTOR 1000000 //conversione da microsecondi us a secondi s
-#define TIME_TO_SLEEP ((02 % 50) + 5) // 107184(02)
+#define TIME_TO_SLEEP 7 //((02 % 50) + 5) // 107184(02)
 #define SOUND_SPEED 0.034 //[cm/us]
-
-// RTC_DATA_ATTR int bootCount = 0; //contatore dei reboot non funziona
 const int TRIGGER_PIN = 13; //pin D13 
 const int ECHO_PIN = 12; //pin D12
 long duration; //durata impulso del sensore 
 float distance; //[cm]
 uint8_t broadcastAddress[] = {0x8C, 0xAA, 0xB5, 0x84, 0xFB, 0x90}; //distanza dell'ESP32
-String message;  // Variabile per memorizzare i dati ricevuti dell'ESP32-NOW
 esp_now_peer_info_t peerInfo; //struttura per memorizzare le info del peer ESP-NOW
+
 
 //funzione di callback per invio di dati
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   //controllo correttezza dello stato
-  //Serial.print("Send Status: ");
-  //Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Ok" : "Error");
+  Serial.print("Send Status: ");
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Ok" : "Error \n");
 }
+
 //funzione di callback per ricezione dei dati
 void OnDataRecv(const uint8_t * mac, const uint8_t *data, int len) {
   //copio nella variabile message i dati ricevuti e li stampo a schermo
-  String receivedMessage = String((char*)data);
+  String received_message = String((char*)data);
   Serial.print("Status received: ");
-  Serial.println(message);
+  Serial.println(received_message);
 }
 
 //funzione per misurare la distanza e inviare 
 String Distance() {
+  String message;
   //inizializzazione del TRIGGER PIN:
   //inizializzo TRIGGER_PIN a low per evitare sia alto dall'inizio per qualche errore e aspetto 2 microsecondi
   //imposto TRIGGER_PIN ad high per inviare impulso ultrasonico per 10 microsecondi
@@ -47,45 +47,52 @@ String Distance() {
   distance = duration * SOUND_SPEED / 2; //[distanza]=[velocita]*[tempo]/2
   //controllo che la distanza misurata sia inferiore a 50cm == parcheggio occupato da una macchina
   if (distance <= 50) {
-    message = "OCCUPIED";
+    message = "OCCUPIED\n";
     //Serial.println("Il parcheggio è occupato");
   } else {
-    message = "FREE";
+    message = "FREE\n";
     //Serial.println("Il parcheggio è libero");
   }
   return message;
 }
 
+//funzione per inviare messaggi e misurare la durata della trasmissione
 void send_message(const uint8_t *address, const String &message) {
-
-
-  // Misura il tempo di inizio della trasmissione
-  unsigned long start_transmission = micros();
-  //-----------INIZIO TRASMISSIONE MESSAGGIO:
   esp_now_send(address, (uint8_t *)message.c_str(), message.length() + 1);
-  //-----------FINE TRASMISSIONE MESSAGGIO:
-  unsigned long end_transmission = micros();
-  unsigned long transmissionDuration = end_transmission - start_transmission;
-  Serial.println("Durata trasmissione: " + String(transmissionDuration) + " microsecondi");
+}
+
+//
+void print_wakeup_reason() {
+  esp_sleep_wakeup_cause_t wakeup_reason;
+  wakeup_reason = esp_sleep_get_wakeup_cause();
+  switch (wakeup_reason) {
+    case ESP_SLEEP_WAKEUP_EXT0: Serial.println("Wakeup caused by external signal using RTC_IO"); break;
+    case ESP_SLEEP_WAKEUP_EXT1: Serial.println("Wakeup caused by external signal using RTC_CNTL"); break;
+    case ESP_SLEEP_WAKEUP_TIMER: Serial.println("Wakeup caused by timer"); break;
+    case ESP_SLEEP_WAKEUP_TOUCHPAD: Serial.println("Wakeup caused by touchpad"); break;
+    case ESP_SLEEP_WAKEUP_ULP: Serial.println("Wakeup caused by ULP program"); break;
+    default: Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason); break;
+  }
 }
 
 void setup() {
   //-----------------INIZIO DEL BOOT:
-  unsigned long boot_start = micros();
   //inizializzazione della comunicazione seriale
+  unsigned long boot_start = micros();
   Serial.begin(115200);
+  //print_wakeup_reason();
   unsigned long boot_end = micros();
   unsigned long boot_duration = boot_end - boot_start;
   Serial.println("Durata boot: " + String(boot_duration) + " microsecondi");
   //-----------------FINE BOOT:
 
-  //-----------------DURATA WIFI-OFF:
+  //-----------------DURATA WIFI-OFF(IDLE):
   unsigned long wifi_off_start = micros();
   WiFi.mode(WIFI_STA);
   unsigned long wifi_off_end = micros();
   unsigned long wifi_off_duration = wifi_off_end - wifi_off_start;
-  Serial.println("Durata wifi-off: " + String(wifi_off_duration) + " microsecondi");
-  //------------------FINE WIFI-OFF.
+  Serial.println("Durata wifi-off(idle): " + String(wifi_off_duration) + " microsecondi");
+  //------------------FINE WIFI-OFF(IDLE).
 
   //----------------------------------INIZIO WIFI-ON:
   //inizializzazione di ESP-NOW e registrazione delle funzioni di callback
@@ -101,43 +108,38 @@ void setup() {
   //configuro i pin di trigger e di echo del sensore 
   pinMode(TRIGGER_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT); 
-
-
-  //--------------------------INIZIO IDLE:
-  // SECONDO ME NON VI è IDLE PERCHE SUBITO DOPO IL BOOT PARTO CON LA LETTURE DEL SENSORE SENZA ASPETTARE NULLA!
-  //--------------------------FINE IDLE.
-
-
+ 
   //--------------------------INIZIO SENSOR READING:
   unsigned long start_measure = micros();
   //calcolo della distanza del sensore e invio del sengale:
-  message = Distance();
+  String msg = Distance();
   unsigned long end_measure = micros();
   unsigned long measureDuration = end_measure - start_measure;
   Serial.println("Durata sensor reading: " + String(measureDuration) + " microsecondi");
   //-----------------------FINE SENSOR READING.
 
 
-  //----------------------INIZIO TRASMISSIONE:
+  //----------------------INIZIO INVIO TRASMISSIONE:
   unsigned long start_transmission = micros();
-  send_message(broadcastAddress, message);
+  send_message(broadcastAddress, msg);
   unsigned long end_transmission = micros();
   unsigned long transmissionDuration = end_transmission - start_transmission;
   Serial.println("Durata trasmissione: " + String(transmissionDuration) + " microsecondi");
-  //----------------------FINE TRASMISSIONE.
+  //----------------------FINE INVIO TRASMISSIONE.
+
   unsigned long wifi_on_end = micros();
   unsigned long wifi_on_duration = wifi_on_end - wifi_on_start;
-  Serial.println("Durata trasmissione: " + String(transmissionDuration) + " microsecondi");
+  Serial.println("Durata wifi-on: " + String(wifi_on_duration) + " microsecondi");
   //-----------------------------------------FINE WIFI-ON
 
   
   //-------------INIZIO MODALITA DEEP SLEEP:
   //configurazione della modalità sleep dopo aver inviato il messaggio 
-  Serial.println("INGRESSO IN MODALITA DEEP SLEEP...");
-  //Serial.println("Contatore di boot prima del deep sleep: " + String(bootCount));
-  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR); //setto il timer prima di risvegliarlo
-  esp_deep_sleep_start(); //ingresso effettivo in modalita deep sleep
-  //--------------FINE MODALITA DEEP SLEEP
+  esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR*TIME_TO_SLEEP);
+  Serial.println("Durata deep-sleep:" + String(TIME_TO_SLEEP) + " Seconds \n");
+  Serial.flush(); 
+  esp_deep_sleep_start();
+  //Serial.println("This will never be printed");
 }
 
 void loop() {

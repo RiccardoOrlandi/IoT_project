@@ -1,14 +1,16 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+
 
 
 Y = 8402 % 5000 + 15000 #1071(8402)
 
-# Load the CSV file
-df1 = pd.read_csv('/Users/riccardoorlandi/Desktop/universita/5anno/2semestre/INTERNET_OF_THINGS/projects/IoT_project/project1/data/deep_sleep.csv')
-df2 = pd.read_csv('/Users/riccardoorlandi/Desktop/universita/5anno/2semestre/INTERNET_OF_THINGS/projects/IoT_project/project1/data/sensor_read.csv')
-df3 = pd.read_csv('/Users/riccardoorlandi/Desktop/universita/5anno/2semestre/INTERNET_OF_THINGS/projects/IoT_project/project1/data/transmission_power.csv')
+# Carica i file CSV
+df1 = pd.read_csv(os.path.join(os.getcwd(), 'project1', 'data', 'deep_sleep.csv'))
+df2 = pd.read_csv(os.path.join(os.getcwd(), 'project1', 'data', 'sensor_read.csv'))
+df3 = pd.read_csv(os.path.join(os.getcwd(), 'project1', 'data', 'transmission_power.csv'))
 
 #extract the data column
 data_values1 = df1['Data']

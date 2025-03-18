@@ -29,7 +29,7 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *data, int len) {
   Serial.println(received_message);
 }
 
-//funzione per misurare la distanza e inviare 
+//funzione per misurare la distanza e inviare dati
 String Distance() {
   String message;
   //inizializzazione del TRIGGER PIN:

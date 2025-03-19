@@ -29,7 +29,7 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *data, int len) {
   Serial.println(received_message);
 }
 
-//funzione per misurare la distanza e inviare dati
+//funzione per misurare la distanza e inviare 
 String Distance() {
   String message;
   //inizializzazione del TRIGGER PIN:
@@ -61,7 +61,7 @@ void send_message(const uint8_t *address, const String &message) {
   esp_now_send(address, (uint8_t *)message.c_str(), message.length() + 1);
 }
 
-//
+
 void print_wakeup_reason() {
   esp_sleep_wakeup_cause_t wakeup_reason;
   wakeup_reason = esp_sleep_get_wakeup_cause();
@@ -76,25 +76,36 @@ void print_wakeup_reason() {
 }
 
 void setup() {
-  //-----------------INIZIO DEL BOOT:
+  //------------------------------------------INIZIO DEL BOOT:
   //inizializzazione della comunicazione seriale
   unsigned long boot_start = micros();
   Serial.begin(115200);
+  //configuro i pin di trigger e di echo del sensore 
+  pinMode(TRIGGER_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT); 
   //print_wakeup_reason();
   unsigned long boot_end = micros();
   unsigned long boot_duration = boot_end - boot_start;
   Serial.println("Durata boot: " + String(boot_duration) + " microsecondi");
-  //-----------------FINE BOOT:
+  //----------------------------------------FINE BOOT:
 
-  //-----------------DURATA WIFI-OFF(IDLE):
-  unsigned long wifi_off_start = micros();
+  //----------------------------------------INIZIO WIFI-OFF(IDLE):
+  unsigned long wifi_off_start = micros(); 
+  //-----------------INIZIO SENSOR READING:
+  unsigned long start_measure = micros();
+  //calcolo della distanza del sensore e invio del sengale:
+  String msg = Distance();
+  unsigned long end_measure = micros();
+  unsigned long measureDuration = end_measure - start_measure;
+  Serial.println("Durata sensor reading: " + String(measureDuration) + " microsecondi");
+  //-----------------FINE SENSOR READING.
   WiFi.mode(WIFI_STA);
   unsigned long wifi_off_end = micros();
   unsigned long wifi_off_duration = wifi_off_end - wifi_off_start;
   Serial.println("Durata wifi-off(idle): " + String(wifi_off_duration) + " microsecondi");
-  //------------------FINE WIFI-OFF(IDLE).
+  //----------------------------------------FINE WIFI-OFF(IDLE).
 
-  //----------------------------------INIZIO WIFI-ON:
+  //----------------------------------------INIZIO WIFI-ON(TRANSMISSION):
   //inizializzazione di ESP-NOW e registrazione delle funzioni di callback
   unsigned long wifi_on_start = micros();
   esp_now_init();
@@ -105,41 +116,24 @@ void setup() {
   peerInfo.channel = 0;  
   peerInfo.encrypt = false;
   esp_now_add_peer(&peerInfo);
-  //configuro i pin di trigger e di echo del sensore 
-  pinMode(TRIGGER_PIN, OUTPUT);
-  pinMode(ECHO_PIN, INPUT); 
- 
-  //--------------------------INIZIO SENSOR READING:
-  unsigned long start_measure = micros();
-  //calcolo della distanza del sensore e invio del sengale:
-  String msg = Distance();
-  unsigned long end_measure = micros();
-  unsigned long measureDuration = end_measure - start_measure;
-  Serial.println("Durata sensor reading: " + String(measureDuration) + " microsecondi");
-  //-----------------------FINE SENSOR READING.
-
-
-  //----------------------INIZIO INVIO TRASMISSIONE:
+  //-----------------------INIZIO TRASMISSIONE:
   unsigned long start_transmission = micros();
   send_message(broadcastAddress, msg);
   unsigned long end_transmission = micros();
   unsigned long transmissionDuration = end_transmission - start_transmission;
   Serial.println("Durata trasmissione: " + String(transmissionDuration) + " microsecondi");
-  //----------------------FINE INVIO TRASMISSIONE.
-
+  //----------------------FINE TRASMISSIONE.
   unsigned long wifi_on_end = micros();
   unsigned long wifi_on_duration = wifi_on_end - wifi_on_start;
   Serial.println("Durata wifi-on: " + String(wifi_on_duration) + " microsecondi");
-  //-----------------------------------------FINE WIFI-ON
+  //----------------------------------------------FINE WIFI-ON
 
-  
-  //-------------INIZIO MODALITA DEEP SLEEP:
-  //configurazione della modalità sleep dopo aver inviato il messaggio 
+  //-----------------------------------------INIZIO MODALITA DEEP SLEEP:
   esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR*TIME_TO_SLEEP);
   Serial.println("Durata deep-sleep:" + String(TIME_TO_SLEEP) + " Seconds \n");
   Serial.flush(); 
   esp_deep_sleep_start();
-  //Serial.println("This will never be printed");
+
 }
 
 void loop() {

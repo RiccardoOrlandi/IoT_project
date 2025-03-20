@@ -64,7 +64,7 @@ total_energy_consumption = (energy_boot+energy_wifi_off+energy_wifi_on+energy_de
 # Print the results
 print(f"Average Power Consumption during Boot: {avg_power_boot} mW")
 print(f"Average Power Consumption during Idle: {avg_power_wifi_off} mW")
-print(f"Average Power Consumption during Transmission: {avg_power_wifi_on} mW")
+print(f"Average Power Consumption during Transmission: {avg_power_transmission} mW")
 print(f"Average Power Consumption during Deep Sleep: {avg_power_deep_sleep} mW")
 print(f"Total Energy Consumption for one Transmission Cycle: {total_energy_consumption} mJ")
 

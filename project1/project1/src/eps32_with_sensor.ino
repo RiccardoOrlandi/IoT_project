@@ -79,6 +79,7 @@ void setup() {
   //------------------------------------------INIZIO DEL BOOT:
   //inizializzazione della comunicazione seriale
   unsigned long boot_start = micros();
+  Serial.println("start boot" + String(micros()));
   Serial.begin(115200);
   //configuro i pin di trigger e di echo del sensore 
   pinMode(TRIGGER_PIN, OUTPUT);
@@ -86,7 +87,8 @@ void setup() {
   //print_wakeup_reason();
   unsigned long boot_end = micros();
   unsigned long boot_duration = boot_end - boot_start;
-  Serial.println("Durata boot: " + String(boot_duration) + " microsecondi");
+  Serial.println("boot to measure: " + String(micros()-boot_start));
+  //Serial.println("Durata boot: " + String(boot_duration) + " microsecondi");
   //----------------------------------------FINE BOOT:
 
   //----------------------------------------INIZIO WIFI-OFF(IDLE):
@@ -97,12 +99,14 @@ void setup() {
   String msg = Distance();
   unsigned long end_measure = micros();
   unsigned long measureDuration = end_measure - start_measure;
-  Serial.println("Durata sensor reading: " + String(measureDuration) + " microsecondi");
+  Serial.println("measure to wifi off: " + String(micros()-boot_start));
+  //Serial.println("Durata sensor reading: " + String(measureDuration) + " microsecondi");
   //-----------------FINE SENSOR READING.
   WiFi.mode(WIFI_STA);
   unsigned long wifi_off_end = micros();
   unsigned long wifi_off_duration = wifi_off_end - wifi_off_start;
-  Serial.println("Durata wifi-off(idle): " + String(wifi_off_duration) + " microsecondi");
+  Serial.println("wifi off to wifi on: " + String(micros()-boot_start));
+  //Serial.println("Durata wifi-off(idle): " + String(wifi_off_duration) + " microsecondi");
   //----------------------------------------FINE WIFI-OFF(IDLE).
 
   //----------------------------------------INIZIO WIFI-ON(TRANSMISSION):
@@ -116,23 +120,28 @@ void setup() {
   peerInfo.channel = 0;  
   peerInfo.encrypt = false;
   esp_now_add_peer(&peerInfo);
+  Serial.println("wifi on to sending message " + String(micros()-boot_start));
   //-----------------------INIZIO TRASMISSIONE:
   unsigned long start_transmission = micros();
   send_message(broadcastAddress, msg);
   unsigned long end_transmission = micros();
   unsigned long transmissionDuration = end_transmission - start_transmission;
-  Serial.println("Durata trasmissione: " + String(transmissionDuration) + " microsecondi");
+  //Serial.println("Durata trasmissione: " + String(transmissionDuration) + " microsecondi");
   //----------------------FINE TRASMISSIONE.
   unsigned long wifi_on_end = micros();
   unsigned long wifi_on_duration = wifi_on_end - wifi_on_start;
-  Serial.println("Durata wifi-on: " + String(wifi_on_duration) + " microsecondi");
+  //Serial.println("Durata wifi-on: " + String(wifi_on_duration) + " microsecondi");
+  Serial.println("sending message to wifi on: " + String(micros()-boot_start));
+  WiFi.mode(WIFI_OFF);
+  Serial.println("wifi on to deep sleep: " + String(micros()-boot_start));
   //----------------------------------------------FINE WIFI-ON
 
   //-----------------------------------------INIZIO MODALITA DEEP SLEEP:
   esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR*TIME_TO_SLEEP);
   Serial.println("Durata deep-sleep:" + String(TIME_TO_SLEEP) + " Seconds \n");
-  Serial.flush(); 
+  Serial.flush();
   esp_deep_sleep_start();
+
 
 }
 

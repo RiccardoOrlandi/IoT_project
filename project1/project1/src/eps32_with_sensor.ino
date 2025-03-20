@@ -127,7 +127,7 @@ void setup() {
   unsigned long wifi_on_duration = wifi_on_end - wifi_on_start;
   Serial.println("Durata wifi-on: " + String(wifi_on_duration) + " microsecondi");
   //----------------------------------------------FINE WIFI-ON
-
+  
   //-----------------------------------------INIZIO MODALITA DEEP SLEEP:
   esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR*TIME_TO_SLEEP);
   Serial.println("Durata deep-sleep:" + String(TIME_TO_SLEEP) + " Seconds \n");

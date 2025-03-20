@@ -1,7 +1,11 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+<<<<<<< HEAD:project1/power_estimation.py
 
+=======
+import os
+>>>>>>> 5bbbd76f706bd5376284c1a35074c933a4cf23dc:project1/project1/src/power_estimation.py
 
 Y = 8402 % 5000 + 15000 #1071(8402)
 

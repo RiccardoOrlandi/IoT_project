@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Define the data
-phases = ['deep sleep','boot', 'measuring', 'turning wifi on', 'setting up connection', 'transmission', 'deep sleep']
-durations = [0.1,0.00095, 0.0025, 0.182897, 0.000505, 0.00041, 0.1]
-powers = [59.66, 367.1, 466.7, 310.9, 775.5, 1222, 59.66]
+phases = ['deep sleep','boot', 'measuring', 'turning wifi on', 'setting up connection', 'transmission','turning wifi off', 'deep sleep']
+durations = [0.1,0.00095, 0.0025, 0.182897, 0.000505, 0.00041,0.005145, 0.1]
+powers = [0, 367.1, 466.7, 310.9, 775.5, 1222,775.5, 0]
 
 # Create time axis
 time = []

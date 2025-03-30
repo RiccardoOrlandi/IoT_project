@@ -6,6 +6,8 @@
 #ELIMINA I CONFIRMABLE CON LO STESSO TOKEN (PER OGNI RISORSA)
 #TROVA LE RISORSE(TOPIC) CHE HANNO LO STESSO NUMERO DI CONFIRMABLE E NON CONFIRMABLE
 
+#server ip: 134.102.218.18
+#coap.me
 
 import pandas as pd
 import re
@@ -71,3 +73,7 @@ for topic in topic_message_count1:
     if topic in topic_message_count2:
         if len(topic_message_count1[topic]) == len(topic_message_count2[topic]):
             print(f"{topic}: {len(topic_message_count1[topic])} messaggi")
+
+#successivamente verifica che l'ip di destinazione sia quello di coap.me
+#in questo caso sono tutti diretti all'ip del coap.me
+

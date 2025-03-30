@@ -1,7 +1,7 @@
 #How many different MQTT clients specify a last Will Message to be directed to a topic having as first level "university”?
 
 #1.cerco tutti i connect command con un last_will_msg e con topic university......filtro: mqtt.msgtype == 1 && mqtt.willmsg && mqtt.willtopic contains "university
-#2.+ da verificare che sia arrivato o meno????????-----in tal caso estrai id dell messagio e verifica che il suo relativo connack abbia retunr code 0
+#2.da verificare che sia arrivato o meno.estrai id dell messagio e verifica che il suo relativo connack abbia retunr code 0
 
 
 import pandas as pd

@@ -13,7 +13,7 @@ import pandas as pd
 import re
 
 # Percorsi dei file CSV
-file_path1 = "pacchetti_filtrati/question2/confirmable.csv"
+file_path1 = "pacchetti_filtrati/question2/confirmable_get.csv"
 file_path2 = "pacchetti_filtrati/question2/nonconfirmable_get.csv"
 
 # Carica i dati dai due file CSV

@@ -1,5 +1,5 @@
 import pandas as pd
-import re
+
 
 # Percorsi dei file CSV
 file_path = "pacchetti_filtrati/question3/clients_with_multilevel_wildcards_hivemq.csv"
